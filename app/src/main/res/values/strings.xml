@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Cialo</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_login">Lytut</string>
+
+    <!-- Facebook -->
+    <string name="facebook_app_id">5182071138555916</string>
+    <string name="fb_login_protocol_scheme">todo123</string>
+    <string name="facebook_client_token">bd251618e272fb4bee504f52b0a4a169</string>
+
+    <!-- Google -->
+    <string name="google_client_id">94654999108-s4bo10od5rpctuhua1068mt4hotl1k5j.apps.googleusercontent.com</string>
+    <string name="google_client_secret">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</string>
+
+    <!-- Notifications -->
+    <string name="channel_name">CialoChannel</string>
+    <string name="channel_description">Cialo description</string>
+
+    <!-- Estimote -->
+    <string name="estimoteAppId">cialokotlin-7y8</string>
+    <string name="estimoteAppToken">25d78d7f1eee65f393adc7d5a2c51bc1</string>
+
+
+
+
+</resources>
+
+
