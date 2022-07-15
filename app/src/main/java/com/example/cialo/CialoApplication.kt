@@ -49,9 +49,6 @@ class CialoApplication : Application() {
 
     fun startEstimote() {
 
-
-
-
         _proximtiyManager = ProximityContentManager(
             this,
             getString(R.string.estimoteAppId),
