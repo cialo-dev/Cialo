@@ -33,7 +33,7 @@ class NotificationService : INotificationService {
         return NotificationCompat.Builder(context, _channelId)
             .setContentTitle("Witaj w klubie")
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentText("Jesteś chuju namierzany.")
+            .setContentText("Jesteś namierzany.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }
