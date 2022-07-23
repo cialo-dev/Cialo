@@ -10,9 +10,8 @@ import retrofit2.http.POST
 
 
 interface IApiClient {
-    @Headers("Content-Type: application/json")
-    @POST("region/rage")
-    suspend fun sendEnter(@Body requestBody: RequestBody)
+    suspend fun getRegions(): List<RegionDto>
 
-    suspend fun getRegions() : List<RegionDto>
+    @POST("authentication/login")
+    suspend fun login(@Body model: LoginApiModel): Boolean
 }

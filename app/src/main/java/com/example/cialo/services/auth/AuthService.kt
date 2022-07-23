@@ -17,7 +17,7 @@ class AuthService : IAuthenticationService {
             .getString(_currentUserKey, null) ?: return null
 
         return try {
-            Gson().fromJson<CurrentUser>(currentUserJson, CurrentUser::class.java)
+            Gson().fromJson(currentUserJson, CurrentUser::class.java)
         } catch (ex: Exception) {
             null
         }
@@ -28,7 +28,14 @@ class AuthService : IAuthenticationService {
             .putString(_currentUserKey, Gson().toJson(currentUser))
     }
 
+    override fun removeUser(context: Context) {
+        context.getSharedPreferences(_thisSharedPreferencesKey, MODE_PRIVATE).edit()
+            .remove(_currentUserKey);
+    }
+
     override fun isLoggedIn(context: Context): Boolean {
+        this.getCurrentUser(context) ?: return false
+
         if (isLoggedInWithFacebook())
             return true
 

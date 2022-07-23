@@ -1,11 +1,12 @@
-package com.example.cialo.services.auth
+package com.example.cialo.services.api
 
 import com.example.cialo.models.AuthenticationProvider
 
-class CurrentUser(
-    val id: String,
+data class LoginApiModel(
     val provider: AuthenticationProvider,
+    val providerId: String,
     val email: String?,
     val firstName: String?,
-    val secondName: String?,
-)
+    val lastName: String?,
+);
+

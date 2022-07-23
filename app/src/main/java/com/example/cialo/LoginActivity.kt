@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.cialo.models.AuthenticationProvider
+import com.example.cialo.services.api.IApiClient
+import com.example.cialo.services.api.LoginApiModel
 import com.example.cialo.services.auth.CurrentUser
 import com.example.cialo.services.auth.IAuthenticationService
 import com.facebook.*
@@ -16,10 +19,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent
 
 
-//TODO: Call finish() after move to MainActivity
 class LoginActivity : AppCompatActivity() {
 
     private val googleRequestCode = 555;
@@ -27,6 +33,10 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var _facebookCallbackManager: CallbackManager
     private lateinit var _facebookLoginButton: LoginButton
     private lateinit var _googleLoginButton: SignInButton
+
+    private val _apiClient: IApiClient by KoinJavaComponent.inject(
+        IApiClient::class.java)
+
     private val _authService: IAuthenticationService by KoinJavaComponent.inject(
         IAuthenticationService::class.java)
 
@@ -47,6 +57,23 @@ class LoginActivity : AppCompatActivity() {
         initGoogle()
     }
 
+    private fun handleLogin(user: CurrentUser) {
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val result = _apiClient.login(LoginApiModel(
+                user.provider,
+                user.id,
+                user.email,
+                user.firstName,
+                user.secondName
+            ));
+            if (result)
+                _authService.setUser(CialoApplication.instance, user);
+
+        }
+        goToHome();
+    }
+
     private fun goToHome() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
@@ -61,7 +88,7 @@ class LoginActivity : AppCompatActivity() {
 
         val mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        _googleLoginButton = findViewById<SignInButton>(R.id.sign_in_button)
+        _googleLoginButton = findViewById(R.id.sign_in_button)
         _googleLoginButton.setOnClickListener({
             val signInIntent: Intent = mGoogleSignInClient.getSignInIntent()
             startActivityForResult(signInIntent, googleRequestCode)
@@ -71,7 +98,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode === googleRequestCode) {
+        if (requestCode == googleRequestCode) {
             val task: Task<GoogleSignInAccount> =
                 GoogleSignIn.getSignedInAccountFromIntent(data)
             handleGoogleResult(task)
@@ -87,9 +114,13 @@ class LoginActivity : AppCompatActivity() {
                 return;
             }
 
-            this._authService.setUser(this,
-                CurrentUser(account.id!!, account.email, account.givenName, account.familyName))
-            this.goToHome()
+            this.handleLogin(CurrentUser(
+                account.id!!,
+                AuthenticationProvider.Google,
+                account.email,
+                account.givenName,
+                account.familyName
+            ))
 
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
@@ -112,6 +143,7 @@ class LoginActivity : AppCompatActivity() {
             override fun onSuccess(loginResult: LoginResult) {
                 val d = Log.d("letsSee", "Facebook token: " + loginResult.accessToken.token)
 
+                getUserDataFromFacebook(loginResult)
                 loginResult.accessToken.userId;
 
             }
@@ -132,6 +164,7 @@ class LoginActivity : AppCompatActivity() {
         ) { obj, response ->
             Log.v("LoginActivity", response.toString())
 
+            //TODO
             // Application code
             val email = obj!!.getString("email")
             val birthday = obj!!.getString("birthday") // 01/31/1980 format
