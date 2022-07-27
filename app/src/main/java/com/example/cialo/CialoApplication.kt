@@ -30,18 +30,8 @@ class CialoApplication : Application() {
     private lateinit var _proximityManager: ProximityContentManager
     private lateinit var _proximityObserver: ProximityObserver
 
-    //private val _alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    //private var _eventSchedulerIntent: PendingIntent;
-
-
-    init {
-        /*val eventServiceIntent = Intent(applicationContext, EventsSenderService::class.java)
-
-        _eventSchedulerIntent = PendingIntent.getService(applicationContext,
-            RequestCodes.schedulerIntentRequestCode,
-            eventServiceIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT)*/
-    }
+    private lateinit var _alarmManager: AlarmManager;
+    private lateinit var _eventSchedulerIntent: PendingIntent;
 
     companion object {
         lateinit var instance: CialoApplication private set
@@ -51,34 +41,22 @@ class CialoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this;
-        val appModule = module {
-            single<INotificationService> { NotificationService() }
-            single<IApiClient> { CialoApiClient() }
-            single<IAuthenticationService> { AuthService() }
-            single<DatabaseContext> {
-                Room.databaseBuilder(
-                    applicationContext,
-                    DatabaseContext::class.java, "cialodb"
-                ).build()
-            }
-        }
-        startKoin {
-            androidContext(this@CialoApplication)
-            modules(appModule)
-        }
 
+        initDependencies();
+        initEventScheduler();
         startEstimote()
     }
 
+
     fun runEventsScheduler() {
-        /*_alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME,
+        _alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME,
             SystemClock.elapsedRealtime(),
             BuildConfig.SendEventsIntervalMinutes.toLong() * 60000,
-            _eventSchedulerIntent)*/
+            _eventSchedulerIntent)
     }
 
     fun stopEventsScheduler() {
-        //_alarmManager.cancel(_eventSchedulerIntent);
+        _alarmManager.cancel(_eventSchedulerIntent);
     }
 
     fun startEstimote() {
@@ -103,5 +81,34 @@ class CialoApplication : Application() {
             .withBalancedPowerMode()
             .withScannerInForegroundService(notificationService.createProximityNotification(this))
             .build()
+    }
+
+    private fun initEventScheduler() {
+        _alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val eventServiceIntent = Intent(applicationContext, EventsSenderService::class.java)
+
+        _eventSchedulerIntent = PendingIntent.getService(applicationContext,
+            RequestCodes.schedulerIntentRequestCode,
+            eventServiceIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT)
+
+    }
+
+    private fun initDependencies() {
+        val appModule = module {
+            single<INotificationService> { NotificationService() }
+            single<IApiClient> { CialoApiClient() }
+            single<IAuthenticationService> { AuthService() }
+            single<DatabaseContext> {
+                Room.databaseBuilder(
+                    applicationContext,
+                    DatabaseContext::class.java, "cialodb"
+                ).build()
+            }
+        }
+        startKoin {
+            androidContext(this@CialoApplication)
+            modules(appModule)
+        }
     }
 }
