@@ -3,8 +3,6 @@ package com.example.cialo.services.proximity
 import android.content.Context
 import android.util.Log
 import com.estimote.proximity_sdk.api.*
-import com.example.cialo.services.api.CialoApiClient
-import com.example.cialo.services.api.IApiClient
 import com.example.cialo.services.api.RegionDto
 import com.example.cialo.services.database.DatabaseContext
 import com.example.cialo.services.database.RegionEventType
@@ -14,7 +12,6 @@ import com.example.cialo.services.notifications.NotificationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 
 class ProximityContentManager(private val context: Context) {

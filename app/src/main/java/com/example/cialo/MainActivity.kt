@@ -1,6 +1,10 @@
 package com.example.cialo
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -10,6 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.estimote.mustard.rx_goodness.rx_requirements_wizard.RequirementsWizardFactory
 import com.example.cialo.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,6 +40,12 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         runEstimote()
+
+        runEventsScheduler();
+    }
+
+    private fun runEventsScheduler() {
+        CialoApplication.instance.runEventsScheduler();
     }
 
     private fun runEstimote() {

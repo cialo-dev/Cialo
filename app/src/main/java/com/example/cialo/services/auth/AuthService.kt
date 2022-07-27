@@ -2,6 +2,7 @@ package com.example.cialo.services.auth
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import com.example.cialo.CialoApplication
 import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
@@ -11,10 +12,11 @@ class AuthService : IAuthenticationService {
 
     private val _thisSharedPreferencesKey = "cialo_auth"
     private val _currentUserKey = "current_user";
+    private val context = CialoApplication.instance;
 
-    override fun getCurrentUser(context: Context): CurrentUser? {
-        val currentUserJson = context.getSharedPreferences(_thisSharedPreferencesKey, MODE_PRIVATE)
-            .getString(_currentUserKey, null) ?: return null
+    override fun getCurrentUser(): CurrentUser? {
+        val preferences = context.getSharedPreferences(_thisSharedPreferencesKey, MODE_PRIVATE);
+        val currentUserJson = preferences.getString(_currentUserKey, "") ?: return null
 
         return try {
             Gson().fromJson(currentUserJson, CurrentUser::class.java)
@@ -23,18 +25,21 @@ class AuthService : IAuthenticationService {
         }
     }
 
-    override fun setUser(context: Context, currentUser: CurrentUser) {
-        context.getSharedPreferences(_thisSharedPreferencesKey, MODE_PRIVATE).edit()
-            .putString(_currentUserKey, Gson().toJson(currentUser))
+    override fun setUser(currentUser: CurrentUser) {
+        val preferences = context.getSharedPreferences(_thisSharedPreferencesKey, MODE_PRIVATE);
+        val editor = preferences.edit();
+
+        editor.putString(_currentUserKey, Gson().toJson(currentUser))
+        editor.commit()
     }
 
-    override fun removeUser(context: Context) {
+    override fun removeUser() {
         context.getSharedPreferences(_thisSharedPreferencesKey, MODE_PRIVATE).edit()
             .remove(_currentUserKey);
     }
 
-    override fun isLoggedIn(context: Context): Boolean {
-        this.getCurrentUser(context) ?: return false
+    override fun isLoggedIn(): Boolean {
+        this.getCurrentUser() ?: return false
 
         if (isLoggedInWithFacebook())
             return true
