@@ -14,6 +14,4 @@ interface RegionEventDao {
     fun insert(regionEvent: RegionEventEntity)
     @Query("DELETE FROM RegionEvents")
     fun removeAll()
-    @Query("DELETE FROM RegionEvents WHERE Id = :id")
-    fun remove(id: Int)
 }

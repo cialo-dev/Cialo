@@ -6,14 +6,13 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.Header
-import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.*
 
 
 interface RetrofitApiClient {
-    suspend fun getRegions(): List<RegionDto>
+    @GET("beacons")
+    @Headers("Content-Type: application/json")
+    suspend fun getBeacons(): Response<List<BeaconApiModel>>
 
     @POST("authentication/login")
     @Headers("Content-Type: application/json")

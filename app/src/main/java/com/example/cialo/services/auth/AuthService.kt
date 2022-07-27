@@ -53,12 +53,12 @@ class AuthService : IAuthenticationService {
     private fun isLoggedInWithFacebook(): Boolean {
         val accessToken = AccessToken.getCurrentAccessToken()
 
-        return accessToken != null && !accessToken.isExpired;
+        return accessToken != null //&& !accessToken.isExpired;
     }
 
     private fun isLoggedInWithGoogle(context: Context): Boolean {
         val user = GoogleSignIn.getLastSignedInAccount(context)
 
-        return user != null && !user.isExpired
+        return user != null //&& !user.isExpired
     }
 }

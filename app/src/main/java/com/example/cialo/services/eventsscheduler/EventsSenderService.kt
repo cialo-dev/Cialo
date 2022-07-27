@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.example.cialo.CialoApplication
 import com.example.cialo.services.api.BeaconEventApiModel
 import com.example.cialo.services.api.BeaconEventsApiModel
 import com.example.cialo.services.api.IApiClient
@@ -26,6 +27,8 @@ class EventsSenderService : Service() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+
+        Log.i("BackgroundService", "I run")
 
         GlobalScope.launch(Dispatchers.IO) {
             val events = _databaseContext.regionEventsDao().getAll();
@@ -54,6 +57,14 @@ class EventsSenderService : Service() {
         }
 
         return START_NOT_STICKY;
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+
+
+
+        //CialoApplication.instance.stopEventsScheduler();
     }
 
     override fun onBind(p0: Intent?): IBinder? {

@@ -17,4 +17,6 @@ data class BeaconEventApiModel(
     val type: Int,
 )
 
+data class BeaconApiModel(val tag: String, val name: String);
+
 

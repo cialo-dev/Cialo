@@ -8,5 +8,6 @@ import com.example.cialo.services.database.converters.RegionEventTypeConverter
 class RegionEventEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo val dateTimeTicks: Long,
-    @TypeConverters(RegionEventTypeConverter::class) val eventType: RegionEventType
+    @TypeConverters(RegionEventTypeConverter::class) val eventType: RegionEventType,
+    @ColumnInfo val beaconTag: String
 )

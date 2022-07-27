@@ -3,7 +3,7 @@ package com.example.cialo.services.proximity
 import android.content.Context
 import android.util.Log
 import com.estimote.proximity_sdk.api.*
-import com.example.cialo.services.api.RegionDto
+import com.example.cialo.models.BeaconModel
 import com.example.cialo.services.database.DatabaseContext
 import com.example.cialo.services.database.RegionEventType
 import com.example.cialo.services.database.entities.RegionEventEntity
@@ -14,13 +14,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
-class ProximityContentManager(private val context: Context) {
+class ProximityContentManager {
 
     private var _proximityObserverHandler: ProximityObserver.Handler? = null
     private var _notificationService: INotificationService = NotificationService();
     private val databaseContext: DatabaseContext by inject(DatabaseContext::class.java)
 
-    fun start(observer: ProximityObserver, regions: List<RegionDto>) {
+    fun start(observer: ProximityObserver, regions: List<BeaconModel>) {
         val zones = mutableListOf<ProximityZone>();
         for (region in regions) {
             zones.add(createZone(region))
@@ -32,7 +32,7 @@ class ProximityContentManager(private val context: Context) {
         _proximityObserverHandler?.stop()
     }
 
-    private fun createZone(region: RegionDto): ProximityZone {
+    private fun createZone(region: BeaconModel): ProximityZone {
         return ProximityZoneBuilder()
             .forTag(region.tag)
             .inFarRange()
@@ -46,7 +46,8 @@ class ProximityContentManager(private val context: Context) {
                         RegionEventEntity(
                             0,
                             System.currentTimeMillis(),
-                            RegionEventType.Enter
+                            RegionEventType.Enter,
+                            ctx.tag
                         )
                     )
                 }
@@ -59,7 +60,8 @@ class ProximityContentManager(private val context: Context) {
                         RegionEventEntity(
                             0,
                             System.currentTimeMillis(),
-                            RegionEventType.Exit
+                            RegionEventType.Exit,
+                            ctx.tag
                         )
                     )
                 }
