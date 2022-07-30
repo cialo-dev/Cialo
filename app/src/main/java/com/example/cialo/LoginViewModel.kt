@@ -3,13 +3,15 @@ package com.example.cialo
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.example.cialo.exceptionHandling.ApiAppError
+import com.example.cialo.exceptionHandling.AppError
+import com.example.cialo.exceptionHandling.GoogleSignInAppError
 import com.example.cialo.models.AuthenticationProvider
 import com.example.cialo.services.api.IApiClient
-import com.example.cialo.services.api.RetrofitApiClient
 import com.example.cialo.services.api.LoginApiModel
 import com.example.cialo.services.auth.CurrentUser
 import com.example.cialo.services.auth.IAuthenticationService
+import com.example.cialo.ui.abstraction.CialoViewModel
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -22,19 +24,12 @@ import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel : CialoViewModel() {
     private val _apiClient: IApiClient by KoinJavaComponent.inject(IApiClient::class.java)
-    private val _authService: IAuthenticationService by KoinJavaComponent.inject(
-        IAuthenticationService::class.java)
+    private val _authService: IAuthenticationService by KoinJavaComponent.inject(IAuthenticationService::class.java)
     private val _facebookCallbackManager = CallbackManager.Factory.create();
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        onError("Exception handled: ${throwable.localizedMessage}")
-    }
-    private var _loginApiJob: Job? = null;
 
     var isLoggedIn: MutableLiveData<Boolean> = MutableLiveData(false);
-    var errorState: MutableLiveData<String> = MutableLiveData(null);
-
 
     init {
         LoginManager.getInstance().registerCallback(_facebookCallbackManager, object :
@@ -56,8 +51,9 @@ class LoginViewModel : ViewModel() {
         })
     }
 
-    fun isInitiallyLoggedIn() : Boolean{
-        return _authService.isLoggedIn();
+    fun isInitiallyLoggedIn(): Boolean {
+        //return _authService.isLoggedIn();
+        return false
     }
 
     fun loginWithGoogle(data: Task<GoogleSignInAccount>) {
@@ -65,7 +61,7 @@ class LoginViewModel : ViewModel() {
             val account = data.getResult(ApiException::class.java)
 
             if (account.id == null) {
-                //TODO:
+                this.onError(GoogleSignInAppError("Google account id is null"));
                 return;
             }
 
@@ -80,21 +76,16 @@ class LoginViewModel : ViewModel() {
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w("TAG", "signInResult:failed code=" + e.statusCode)
-            //TODO:
+            this.onError(GoogleSignInAppError("Google API Exception", e))
         } catch (e: Exception) {
-            //TODO:
+            this.onError(GoogleSignInAppError("Unhandled", e))
         }
-
-    }
-
-    private fun onError(message: String) {
 
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun login(user: CurrentUser) {
-        _loginApiJob = GlobalScope.launch(Dispatchers.IO + exceptionHandler) {
+        val job = GlobalScope.launch(Dispatchers.IO + getCoroutineExceptionHandler()) {
             val result = _apiClient.login(LoginApiModel(
                 user.provider.value,
                 user.id,
@@ -108,16 +99,14 @@ class LoginViewModel : ViewModel() {
                     _authService.setUser(user)
                     isLoggedIn.value = true;
                 } else {
-                    errorState = MutableLiveData(result.message);
+                    onError(ApiAppError(result.statusCode, result.message ?: "", null))
                 };
             }
         }
+
+        CancellableJobs.add(job);
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        _loginApiJob?.cancel()
-    }
 
     private fun getUserDataFromFacebook(loginResult: LoginResult) {
         val request = GraphRequest.newMeRequest(
@@ -134,5 +123,10 @@ class LoginViewModel : ViewModel() {
         parameters.putString("fields", "id,name,email,gender,birthday")
         request.parameters = parameters
         request.executeAsync()
+    }
+
+    override fun getUiMessage(error: AppError): String {
+        //TODO:
+        return "Cos poszlo nie tak";
     }
 }

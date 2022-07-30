@@ -1,11 +1,6 @@
 package com.example.cialo
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Intent
 import android.os.Bundle
-import android.os.SystemClock
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -14,6 +9,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.estimote.mustard.rx_goodness.rx_requirements_wizard.RequirementsWizardFactory
 import com.example.cialo.databinding.ActivityMainBinding
+import com.example.cialo.exceptionHandling.AppError
+import com.example.cialo.exceptionHandling.AppErrorType
+import com.example.cialo.exceptionHandling.EstimotePermissionsError
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
@@ -42,15 +40,18 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         _viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
+        runEstimote();
+
     }
 
     private fun runEstimote() {
         RequirementsWizardFactory.createEstimoteRequirementsWizard().fulfillRequirements(
             this,
             {
-                //CialoApplication.instance.startEstimote()
+                _viewModel.initServices()
             },
-            { missing -> Log.e("warning", missing.toString()) },
-            { error -> Log.e("error", error.toString()) })
+            { missing -> _viewModel.onError(EstimotePermissionsError(missing)) },
+            { error -> _viewModel.onError(AppError(AppErrorType.EstimoteInitialization, "", error)) })
     }
 }

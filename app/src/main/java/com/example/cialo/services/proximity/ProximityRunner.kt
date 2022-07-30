@@ -16,7 +16,7 @@ class ProximityRunner(
     @OptIn(DelicateCoroutinesApi::class)
     override suspend fun run(): Operation {
 
-        GlobalScope.launch(Dispatchers.IO) {
+       GlobalScope.launch(Dispatchers.IO) {
             val beaconsOperation = _apiClient.getBeacons();
 
             if (beaconsOperation.succeed) {
@@ -25,6 +25,8 @@ class ProximityRunner(
                 Log.e("ProximityRunner", beaconsOperation.message!!);
             }
         }
+
+        //TODO:
         return Operation.createSuccess();
     }
 

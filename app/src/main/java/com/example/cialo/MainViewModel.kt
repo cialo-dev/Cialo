@@ -1,5 +1,6 @@
 package com.example.cialo
 
+import com.example.cialo.exceptionHandling.AppError
 import com.example.cialo.services.database.DatabaseContext
 import com.example.cialo.services.eventsscheduler.IEventSenderRunner
 import com.example.cialo.services.proximity.IProximityRunner
@@ -16,10 +17,14 @@ class MainViewModel : CialoViewModel() {
         IEventSenderRunner::class.java)
     private val _proximityRunner: IProximityRunner by KoinJavaComponent.inject(IProximityRunner::class.java)
 
-    init {
+    fun initServices() {
         GlobalScope.launch(Dispatchers.IO) {
             _proximityRunner.run();
             _eventsSenderRunner.run();
         }
+    }
+
+    override fun onError(error: AppError) {
+        super.onError(error)
     }
 }

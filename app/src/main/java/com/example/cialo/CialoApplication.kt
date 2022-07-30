@@ -11,11 +11,16 @@ import com.example.cialo.services.auth.IAuthenticationService
 import com.example.cialo.services.database.DatabaseContext
 import com.example.cialo.services.eventsscheduler.EventsSenderRunner
 import com.example.cialo.services.eventsscheduler.IEventSenderRunner
+import com.example.cialo.services.logging.DebugLogger
+import com.example.cialo.services.logging.ILog
 import com.example.cialo.services.notifications.INotificationService
 import com.example.cialo.services.notifications.NotificationService
 import com.example.cialo.services.proximity.IProximityRunner
 import com.example.cialo.services.proximity.ProximityContentManager
 import com.example.cialo.services.proximity.ProximityRunner
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.crashes.Crashes
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -36,8 +41,15 @@ class CialoApplication : Application() {
         super.onCreate()
         instance = this;
 
-        initDependencies();
+        initDependencies()
+        initAppCenter()
         initEstimote()
+    }
+
+    private fun initAppCenter() {
+        //TODO: Store varaible
+        AppCenter.start(this, "8005083f-8947-4619-9061-41f6fef51a0c",
+            Analytics::class.java, Crashes::class.java)
     }
 
     private fun initEstimote() {
@@ -73,6 +85,8 @@ class CialoApplication : Application() {
             single<IAuthenticationService> { AuthService() }
             single<IProximityRunner> { _proximityRunner }
             single<IEventSenderRunner> { _eventSenderManager }
+            //TODO:
+            single<ILog> { DebugLogger() }
             single<DatabaseContext> {
                 Room.databaseBuilder(
                     applicationContext,

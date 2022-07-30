@@ -22,7 +22,4 @@ class HomeViewModel : CialoViewModel() {
     private val _text = MutableLiveData<String>().apply {
         value = "This is home Fragment"
     }
-
-
-
 }
